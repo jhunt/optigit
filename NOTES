@@ -1,0 +1,39 @@
+Things we want optigit to do:
+
+- Show us outstanding PRs and their aging
+- Show us outstanding Issues and their aging / handled status
+- Show us stale branches that can / should be deleted
+
+API definition:
+
+    GET /v1/health
+    {
+      "org/repo-name": {
+        "org": "org",
+        "name": "repo-name",
+        "branches": [
+          "master",
+          "fix-some-things"
+         ],
+        "pulls": [
+          {
+            "number": 42,
+            "url":    "https://...",
+            "title":  "stuff fixed yo"
+            "created": 123456789,          # epoch time
+            "updated": -1,                 # never
+            "assignees": ["quintessence"],
+          }
+        ],
+        "issues": [
+          {
+            "number": 41,
+            "url":    "https://...",
+            "title":  "stuff broke yo"
+            "created": 123456789,          # epoch time
+            "updated": -1,                 # never
+            "assignees": [],
+          }
+        ],
+      }
+    }
