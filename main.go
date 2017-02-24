@@ -15,6 +15,10 @@ func main() {
 		fmt.Printf("no GITHUB_TOKEN supplied via environment.\n")
 		os.Exit(1)
 	}
+	if os.Getenv("ORGS") == "" {
+		fmt.Printf("no ORGS supplied via environment.\n")
+		os.Exit(1)
+	}
 
 	bind := bindto()
 	fmt.Printf("listening on %s\n", bind)

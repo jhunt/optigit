@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jhunt/optigit/static"
 )
@@ -24,7 +25,8 @@ func RunAPI(bind string) {
 			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
 		}
 
-		err = Scrape(os.Getenv("GITHUB_TOKEN"), d, "bolo")
+		orgs := strings.Split(os.Getenv("ORGS"), " ")
+		err = Scrape(os.Getenv("GITHUB_TOKEN"), d, orgs...)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "failed: %s\n", err)
