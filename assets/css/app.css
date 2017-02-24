@@ -1,0 +1,137 @@
+body {
+	xbackground: #fff url(../images/goat.png) no-repeat 0% 100%;
+}
+h2 span {
+ font: 400 60%/100% 'Alfa Slab One', serif;
+ color: #333;
+ display: block;
+}
+h2 {
+ font: 500 4.5em/80% 'Alfa Slab One', serif;
+ color: #333;
+}
+
+.heading {
+  height: 110px;
+  position: relative;
+}
+.heading h2 {
+ position: absolute; bottom: 0.4ex;
+}
+
+.panel h3 {
+	background-color: #333;
+	color: #fff;
+	font: 600 16px/12px 'Mako', serif;
+	padding: 1ex;
+}
+.panel ul {
+    margin-bottom: 2em;
+}
+.panel li {
+	padding: 4px 0 16px 0;
+}
+.panel li a {
+	font: 200 20px/22px 'Alfa Slab One', serif;
+	text-decoration: none;
+	color: steelblue;
+    display: block;
+    text-indent: -28px;
+    padding-left: 28px;
+}
+.panel li span {
+	display: block;
+	float: right;
+}
+.panel li p {
+	font: 600 16px/12px 'Mako', serif;
+padding-left: 1.5em; }
+.panel li p em { font-style: italic; }
+.panel li p strong { font-weight: bold; }
+
+.configure li input {
+	margin: 8px;
+}
+.configure li {
+	font: 400 20px/30px 'Mako', serif;
+	padding-left: 2em;
+}
+
+header a {
+	float: right;
+	text-indent: -5000px;
+	display: block;
+	height: 24px;
+	width: 16px;
+	margin: 3px;
+}
+header a[href="#config"] {
+	background: transparent url(../images/gear.png) 50% 50% no-repeat scroll;
+}
+header a[href="#home"] {
+	background: transparent url(../images/home.png) 50% 50% no-repeat scroll;
+}
+
+footer {
+ text-align: center;
+ font: 100 1em/125% 'Mako', serif;
+ color: #666;
+ bottom: 8px;
+ width: 100%;
+ margin-top: 4em;
+}
+
+.age {
+	font: 200 18px/18px 'Mako', serif;
+	background-color: navy;
+	color: #fff;
+	border-radius: 4px;
+	padding: 4px 6px;
+}
+.age.ok   { background-color: forestgreen; }
+.age.warn { background-color: darkorange;  }
+.age.crit { background-color: darkred;     }
+
+.graph {
+    margin-bottom: 1.5em;
+}
+.graph .bar {
+    fill: steelblue;
+    opacity: 0.5;
+}
+.graph .bar:hover {
+    opacity: 1;
+}
+.axis--x path {
+  display: none;
+}
+
+button[rel=scrape] {
+  font: 300 20px/20px 'Mako', sans-serif;
+
+  display: inline-block;
+  margin: 1em 0 0 0;
+  padding: 15px 45px;
+  line-height: 1.8;
+  appearance: none;
+  box-shadow: none;
+  border-radius: 0;
+
+  color: #fff;
+  background-color: #6496c8;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px #27496d;
+}
+button:focus {
+  outline: none
+}
+
+button[rel=scrape]:hover { background-color: #417cb8 }
+button[rel=scrape]:active {
+  background-color: #417cb8;
+  box-shadow: 0 5px #27496d;
+  transform: translateY(5px);
+}
+
+#dashboard, #configure { display: none; }

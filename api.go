@@ -1,95 +1,137 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 
-	"github.com/jhunt/go-db"
+	"github.com/jhunt/optigit/static"
 )
 
-func ReadInformation(d db.DB) (Health, error) {
-	health := make(map[string]Repository)
+func RunAPI(bind string) {
+	http.HandleFunc("/v1/scrape", func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" {
+			w.WriteHeader(404)
+			fmt.Fprintf(w, "404 not found\n")
+			return
+		}
 
-	repos, err := d.Query(`SELECT id, org, name FROM repos WHERE included = 1`)
+		d, err := database()
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+		}
+
+		err = Scrape(os.Getenv("GITHUB_TOKEN"), d, "bolo")
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed: %s\n", err)
+			return
+		}
+		w.WriteHeader(204)
+	})
+
+	http.HandleFunc("/v1/health", func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != "GET" {
+			w.WriteHeader(404)
+			fmt.Fprintf(w, "404 not found\n")
+			return
+		}
+
+		d, err := database()
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+		}
+
+		health, err := ReadInformation(d)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+			return
+		}
+
+		b, err := json.Marshal(health)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed formatting JSON: %s\n", err)
+			return
+		}
+
+		w.Header().Set("Content-type", "application/json")
+		fmt.Fprintf(w, "%s\n", string(b))
+	})
+
+	http.HandleFunc("/v1/repos", func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != "GET" && req.Method != "POST" {
+			w.WriteHeader(404)
+			fmt.Fprintf(w, "404 not found\n")
+			return
+		}
+
+		d, err := database()
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+			return
+		}
+
+		if req.Method == "GET" {
+			repos, err := ReadRepos(d)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+				return
+			}
+
+			b, err := json.Marshal(repos)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "failed formatting JSON: %s\n", err)
+				return
+			}
+
+			w.Header().Set("Content-type", "application/json")
+			fmt.Fprintf(w, "%s\n", string(b))
+			return
+		}
+
+		if req.Method == "POST" {
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "failed reading request body: %s\n", err)
+				return
+			}
+
+			var updates []RepoWatch
+			err = json.Unmarshal(b, &updates)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "failed reading request JSON: %s\n", err)
+				return
+			}
+
+			err = UpdateRepos(d, updates)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "failed applying updates: %s\n", err)
+				return
+			}
+
+			w.WriteHeader(200)
+			w.Header().Set("Content-type", "application/json")
+			fmt.Fprintf(w, "{}")
+			return
+		}
+	})
+
+	http.Handle("/", static.Handler{})
+
+	err := http.ListenAndServe(bind, nil)
 	if err != nil {
-		return nil, err
+		fmt.Fprintf(os.Stderr, "http server exited: %s\n", err)
 	}
-	defer repos.Close()
-
-	for repos.Next() {
-		var (
-			id        int
-			org, name string
-		)
-		err = repos.Scan(&id, &org, &name)
-		if err != nil {
-			return nil, err
-		}
-
-		repo := Repository{
-			Org:  org,
-			Name: name,
-		}
-		issues, err := d.Query(`SELECT id, title, assignees, created_at, updated_at FROM issues WHERE repo_id = ?`, id)
-		if err != nil {
-			return nil, err
-		}
-		defer issues.Close()
-
-		repo.Issues = make([]Issue, 0)
-		for issues.Next() {
-			var (
-				number           int
-				title, assignees string
-				created, updated int
-			)
-			err = issues.Scan(&number, &title, &assignees, &created, &updated)
-			if err != nil {
-				return nil, err
-			}
-
-			repo.Issues = append(repo.Issues, Issue{
-				Number:  number,
-				Title:   title,
-				URL:     fmt.Sprintf("https://github.com/%s/%s/issues/%d", repo.Org, repo.Name, number),
-				Created: created,
-				Updated: updated,
-
-				Assignees: split(assignees),
-			})
-		}
-
-		pulls, err := d.Query(`SELECT id, title, assignees, created_at, updated_at FROM pulls WHERE repo_id = ?`, id)
-		if err != nil {
-			return nil, err
-		}
-		defer pulls.Close()
-
-		repo.PullRequests = make([]PullRequest, 0)
-		for pulls.Next() {
-			var (
-				number           int
-				title, assignees string
-				created, updated int
-			)
-			err = pulls.Scan(&number, &title, &assignees, &created, &updated)
-			if err != nil {
-				return nil, err
-			}
-
-			repo.PullRequests = append(repo.PullRequests, PullRequest{
-				Number:  number,
-				Title:   title,
-				URL:     fmt.Sprintf("https://github.com/%s/%s/pull/%d", repo.Org, repo.Name, number),
-				Created: created,
-				Updated: updated,
-
-				Assignees: split(assignees),
-			})
-		}
-
-		health[fmt.Sprintf("%s/%s", repo.Org, repo.Name)] = repo
-	}
-
-	return health, nil
 }
-

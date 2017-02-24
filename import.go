@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jhunt/go-db"
 	"github.com/google/go-github/github"
+	"github.com/jhunt/go-db"
 )
 
 func findRepo(d db.DB, org, repo string) (int, error) {
@@ -23,7 +23,7 @@ func findRepo(d db.DB, org, repo string) (int, error) {
 	return 0, nil
 }
 
-func importRepo(d db.DB, org, repo string) (error) {
+func importRepo(d db.DB, org, repo string) error {
 	id, err := findRepo(d, org, repo)
 	if err != nil || id > 0 {
 		return err

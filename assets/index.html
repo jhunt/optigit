@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>optigit</title>
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Alfa+Slab+One">
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Mako">
+<link rel="stylesheet" type="text/css" href="/css/reset.css">
+<link rel="stylesheet" type="text/css" href="/css/grid.css">
+<link rel="stylesheet" type="text/css" href="/css/app.css">
+</head>
+
+<body>
+<div id="main" class="container_16">
+  <header class="grid_16">
+    <nav>
+      <li><a href="#config">configure</a></li>
+      <li><a href="#home">home</a></li>
+    </nav>
+  </header>
+
+  <div id="dashboard">
+  <div class="grid_8 panel" id="pulls">
+    <svg class="graph" height="120" width="460"></svg>
+    <div class="heading"><h2><span>Pull</span> Requests</h2></div>
+    <div class="list"></div>
+  </div>
+
+  <div class="grid_8 panel" id="issues">
+    <svg class="graph" height="120" width="460"></svg>
+    <div class="heading"><h2>Issues</h2></div>
+    <div class="list"></div>
+  </div>
+  </div>
+
+  <form id="configure">
+    <div class="grid_3">&nbsp;</div>
+    <div class="grid_10 configure">
+      <div class="heading"><h2><span>Monitored</span>Repositories</h2></div>
+      <ul></ul>
+    </div>
+    <div class="grid_3">&nbsp;</div>
+    <div class="grid_4">&nbsp;</div>
+    <div class="grid_12">&nbsp;
+      <button rel="scrape">Refresh Github Data</button>
+    </div>
+  </form>
+
+</div>
+<footer><p>Copyright &copy; 2017 James Hunt</p></footer>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="/js/app.js"></script>
+</body>
+</html>

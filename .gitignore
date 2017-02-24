@@ -1,2 +1,4 @@
 /optigit
+/embed
 *.db
+static/assets.go
