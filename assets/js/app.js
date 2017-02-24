@@ -205,8 +205,7 @@ $(function () {
 
     }).on('click', 'a[href="#refresh"]', function (event) {
         event.preventDefault();
-        //showDashboard();
-		location.reload();
+        location.reload();
 
     }).on('change', '#configure input[type=checkbox]', function (event) {
         $.ajax({
