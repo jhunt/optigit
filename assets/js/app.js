@@ -203,6 +203,11 @@ $(function () {
         event.preventDefault();
         showDashboard();
 
+    }).on('click', 'a[href="#refresh"]', function (event) {
+        event.preventDefault();
+        //showDashboard();
+		location.reload();
+
     }).on('change', '#configure input[type=checkbox]', function (event) {
         $.ajax({
             type: 'POST',
