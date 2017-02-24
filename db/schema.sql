@@ -9,16 +9,6 @@ CREATE TABLE repos (
 	included integer(1)   not null
 );
 
--- Track a branch, on a single Git Repository
-CREATE TABLE branches (
-	id      integer      not null,
-	repo_id integer      not null,
-	name    varchar(100) not null,
-	sha1    varchar(40)  not null,
-
-	primary key (id, repo_id)
-);
-
 -- Track a Pull Request, against a single Git Repository
 CREATE TABLE pulls (
 	id          integer not null, -- GH-assigned PR number

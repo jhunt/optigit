@@ -23,7 +23,6 @@ type Repository struct {
 	Included     bool          `json:"included"`
 	Org          string        `json:"org"`
 	Name         string        `json:"name"`
-	Branches     []string      `json:"branches"`
 	PullRequests []PullRequest `json:"pulls"`
 	Issues       []Issue       `json:"issues"`
 }
