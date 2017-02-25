@@ -203,6 +203,17 @@ $(function () {
         event.preventDefault();
         showDashboard();
 
+    }).on('click', 'a[href="#refresh"]', function (event) {
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url:  '/v1/scrape',
+            success: function () {
+                console.log('scraped');
+            }
+        });
+        showDashboard();
+
     }).on('change', '#configure input[type=checkbox]', function (event) {
         $.ajax({
             type: 'POST',

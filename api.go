@@ -18,6 +18,7 @@ func RunAPI(bind string) {
 			fmt.Fprintf(w, "404 not found\n")
 			return
 		}
+		fmt.Printf("Starting scrape...\n")
 
 		d, err := database()
 		if err != nil {
@@ -33,6 +34,7 @@ func RunAPI(bind string) {
 			return
 		}
 		w.WriteHeader(204)
+		fmt.Printf("Finished scraping Github data!\n")
 	})
 
 	http.HandleFunc("/v1/health", func(w http.ResponseWriter, req *http.Request) {

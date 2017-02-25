@@ -72,6 +72,10 @@ header a[href="#home"] {
 	background: transparent url(../images/home.png) 50% 50% no-repeat scroll;
 }
 
+header a[href="#refresh"] {
+	background: transparent url(../images/refresh.png) 50% 50% no-repeat scroll;
+}
+
 footer {
  text-align: center;
  font: 100 1em/125% 'Mako', serif;
