@@ -205,7 +205,16 @@ $(function () {
 
     }).on('click', 'a[href="#refresh"]', function (event) {
         event.preventDefault();
-        location.reload();
+        $.ajax({
+            type: 'POST',
+            url:  '/v1/scrape',
+            processData: false,
+            data: JSON.stringify($('#configure').serializeArray()),
+            success: function () {
+                console.log('scraped');
+            }
+        });
+        showDashboard();
 
     }).on('change', '#configure input[type=checkbox]', function (event) {
         $.ajax({
