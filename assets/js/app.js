@@ -208,8 +208,6 @@ $(function () {
         $.ajax({
             type: 'POST',
             url:  '/v1/scrape',
-            processData: false,
-            data: JSON.stringify($('#configure').serializeArray()),
             success: function () {
                 console.log('scraped');
             }
