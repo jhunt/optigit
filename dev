@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export DATABASE=sqlite3:db/sq.db
+export PORT=8081
+export ORGS=starkandwayne
+./optigit
