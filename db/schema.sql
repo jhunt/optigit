@@ -16,6 +16,7 @@ CREATE TABLE pulls (
 
 	created_at  integer NOT NULL,
 	updated_at  integer NOT NULL,
+	reporter    text NOT NULL,
 	assignees   text NOT NULL, -- comma-separated usernames
 
 	title       text NOT NULL,
@@ -30,6 +31,7 @@ CREATE TABLE issues (
 
 	created_at  integer NOT NULL,
 	updated_at  integer NOT NULL,
+	reporter    text NOT NULL,
 	assignees   text NOT NULL, -- comma-separated usernames
 
 	title       text NOT NULL,

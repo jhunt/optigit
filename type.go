@@ -6,6 +6,7 @@ type PullRequest struct {
 	URL       string   `json:"url"`
 	Created   int      `json:"created"`
 	Updated   int      `json:"updated"`
+	Reporter  string   `json:"reporter"`
 	Assignees []string `json:"assignees"`
 }
 
@@ -15,6 +16,7 @@ type Issue struct {
 	URL       string   `json:"url"`
 	Created   int      `json:"created"`
 	Updated   int      `json:"updated"`
+	Reporter  string   `json:"reporter"`
 	Assignees []string `json:"assignees"`
 }
 

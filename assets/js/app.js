@@ -95,78 +95,165 @@ function assignedto(thing) {
     if (thing.assignees.length == 0) {
         return '<em>unassigned</em>';
     }
-    return '<strong>'+thing.assignees.join('</strong>, <strong>')+'</strong>';
+    return '<strong>assigned: '+thing.assignees.join('</strong>, <strong>')+'</strong>';
+}
+
+function reportedby(thing) {
+    if (thing.reporter == "") {
+        return '';
+    }
+    return 'per <strong>'+thing.reporter+'</strong>';
+}
+
+function get_cookie(name, deflt) {
+    var cookies = document.cookie.split(/ *; */);
+    for (var i = 0; i < cookies.length; i++) {
+        var p = cookies[i].split(/=/);
+        if (p.length > 1) {
+            p.shift();
+            return p.join('=');
+        }
+    }
+    return deflt;
 }
 
 $(function () {
-    $('#dashboard, #configure').hide();
+    $('#dashboard, #ignore, #configure').hide();
+
+    var data = {};
+    var users = {}; /* set to 1 if the user should be visible; */
+    try {
+        var usernames = JSON.parse(get_cookie('filter', '[]'));
+        for (var i = 0; i < usernames.length; i++) {
+            users[usernames[i]] = 0;
+        }
+    } catch (e) {
+        console.log("Failed to parse usernames from cookie '%s': %s", document.cookie, e);
+    }
+
+    var filter = function (repo) {
+        var filtered = {};
+        for (k in repo) {
+            if (k != 'pulls' && k != 'issues') {
+                filtered[k] = repo[k];
+                continue;
+            }
+            filtered[k] = [];
+            for (var i = 0; i < repo[k].length; i++) {
+                if (repo[k][i].reporter == "" || users[repo[k][i].reporter]) {
+                    filtered[k].push(repo[k][i]);
+                }
+            }
+        }
+
+        return filtered;
+    }
+
+    var drawDashboard = function () {
+        /* re-order based on oldest issue/pr */
+        var pulls  = [];
+        var issues = [];
+
+        var $l;
+
+        for (var k in data) {
+            for (var type in ['pulls', 'issues']) {
+                for (var i = 0; i < data[k].pulls.length; i++) {
+                    var u = data[k].pulls[i].reporter;
+                    if (u != "" && !(u in users)) {
+                        users[u] = 1; /* default on for newly seen users */
+                    }
+                }
+            }
+        }
+
+        var filtered = {};
+        for (var k in data) {
+            var repo = filter(data[k], users);
+            filtered[k] = repo;
+            if (repo.pulls.length > 0) {
+                pulls.push([
+                    oldest(repo.pulls, 'updated'),
+                    repo
+                ]);
+            }
+            if (repo.issues.length > 0) {
+                issues.push([
+                    oldest(repo.issues, 'updated'),
+                    repo
+                ]);
+            }
+        }
+        issues = issues.sort(function (a, b) { return a[0] - b[0] });
+        pulls  =  pulls.sort(function (a, b) { return a[0] - b[0] });
+
+        $l = $('#issues .list').empty();
+        for (var i = 0; i < issues.length; i++) {
+            var list = '';
+            var repo = issues[i][1];
+            repo.issues = repo.issues.sort(function (a, b) { return a.updated - b.updated });
+            for (var j = 0; j < repo.issues.length; j++) {
+                var issue = repo.issues[j];
+                list += '<li><a href="'+issue.url+'" target="_blank">'+
+                               '#'+issue.number+' '+issue.title+'</a>'+
+                            '<span class="'+css(issue.updated)+'">'+age(issue.updated)+'</span>'+
+                            '<p>'+reportedby(issue)+' / '+assignedto(issue)+'</p></li>';
+            }
+            $l.append($('<h3>'+repo.org+' / '+repo.name+'</h3>'+
+                        '<ul>'+list+'</ul>'));
+        }
+        histograph(histogram(filtered, 'issues'), d3.select('#issues svg'));
+
+        $l = $('#pulls .list').empty();
+        for (var i = 0; i < pulls.length; i++) {
+            var list = '';
+            var repo = pulls[i][1];
+            repo.pulls = repo.pulls.sort(function (a, b) { return a.updated - b.updated });
+            for (var j = 0; j < repo.pulls.length; j++) {
+                var pull = repo.pulls[j];
+                list += '<li><a href="'+pull.url+'" target="_blank">'+
+                               '#'+pull.number+' '+pull.title+'</a>'+
+                            '<span class="'+css(pull.updated)+'">'+age(pull.updated)+'</span>'+
+                            '<p>'+reportedby(pull)+' / '+assignedto(issue)+'</p></li>';
+            }
+            $l.append($('<h3>'+repo.org+' / '+repo.name+'</h3>'+
+                        '<ul>'+list+'</ul>'));
+        }
+        histograph(histogram(filtered, 'pulls'), d3.select('#pulls svg'));
+
+        $('#dashboard').show();
+    }
 
     var showDashboard = function() {
         $('#configure').hide();
         $.ajax({
             type: 'GET',
             url:  '/v1/health',
-            success: function (data) {
-
-                /* re-order based on oldest issue/pr */
-                var pulls  = [];
-                var issues = [];
-                var $l;
-
-                for (var k in data) {
-                    if (data[k].pulls.length > 0) {
-                        pulls.push([
-                            oldest(data[k].pulls, 'updated'),
-                            data[k]
-                        ]);
-                    }
-                    if (data[k].issues.length > 0) {
-                        issues.push([
-                            oldest(data[k].issues, 'updated'),
-                            data[k]
-                        ]);
-                    }
-                }
-                issues = issues.sort(function (a, b) { return a[0] - b[0] });
-                pulls  =  pulls.sort(function (a, b) { return a[0] - b[0] });
-
-                $l = $('#issues .list').empty();
-                for (var i = 0; i < issues.length; i++) {
-                    var list = '';
-                    var repo = issues[i][1];
-                    repo.issues = repo.issues.sort(function (a, b) { return a.updated - b.updated });
-                    for (var j = 0; j < repo.issues.length; j++) {
-                        var issue = repo.issues[j];
-                        list += '<li><a href="'+issue.url+'" target="_blank">'+
-                                       '#'+issue.number+' '+issue.title+'</a>'+
-                                    '<span class="'+css(issue.updated)+'">'+age(issue.updated)+'</span>'+
-                                    '<p>'+assignedto(issue)+'</p></li>';
-                    }
-                    $l.append($('<h3>'+repo.org+' / '+repo.name+'</h3>'+
-                                '<ul>'+list+'</ul>'));
-                }
-                histograph(histogram(data, 'issues'), d3.select('#issues svg'));
-
-                $l = $('#pulls .list').empty();
-                for (var i = 0; i < pulls.length; i++) {
-                    var list = '';
-                    var repo = pulls[i][1];
-                    repo.pulls = repo.pulls.sort(function (a, b) { return a.updated - b.updated });
-                    for (var j = 0; j < repo.pulls.length; j++) {
-                        var pull = repo.pulls[j];
-                        list += '<li><a href="'+pull.url+'" target="_blank">'+
-                                       '#'+pull.number+' '+pull.title+'</a>'+
-                                    '<span class="'+css(pull.updated)+'">'+age(pull.updated)+'</span>'+
-                                    '<p>'+assignedto(pull)+'</p></li>';
-                    }
-                    $l.append($('<h3>'+repo.org+' / '+repo.name+'</h3>'+
-                                '<ul>'+list+'</ul>'));
-                }
-                histograph(histogram(data, 'pulls'), d3.select('#pulls svg'));
-
-                $('#dashboard').show();
+            success: function (rdata) {
+                data = rdata;
+                drawDashboard();
             },
         });
+    };
+
+    var showIgnore = function () {
+        $('#ignore ul li').remove();
+        var $cols = $('#ignore ul');
+
+        var who = [];
+        for (u in users) {
+            who.push(u);
+        }
+        who = who.sort(function (a, b) { return a > b ? 1 : a < b ? -1 : 0 });
+
+        var c = $cols.length;
+        for (var i = 0; i < who.length; i++) {
+            $($cols[i % c]).append('<li><input type="checkbox" id="user_'+who[i]+'" value="'+who[i]+'"'+
+                                         (users[who[i]] ? ' checked' : '') + '> '+
+                                         '<label for="user_'+who[i]+'">'+who[i]+'</label></li>');
+        }
+
+        $('#ignore').show('slide');
     };
 
     var showConfigure = function() {
@@ -195,7 +282,11 @@ $(function () {
 
 
 
-    $(document.body).on('click', 'a[href="#config"]', function (event) {
+    $(document.body).on('click', 'a[href="#ignore"]', function (event) {
+        event.preventDefault();
+        showIgnore();
+
+    }).on('click', 'a[href="#config"]', function (event) {
         event.preventDefault();
         showConfigure();
 
@@ -224,6 +315,24 @@ $(function () {
                 console.log('ok');
             }
         });
+
+    }).on('click', 'button[rel=ignore]', function (event) {
+        event.preventDefault();
+        for (k in users) {
+            users[k] = 0;
+        }
+        $('#ignore input:checked').each(function (i, e) {
+            users[$(e).val()] = 1;
+        });
+        var filterout = []; // for the cookie!
+        for (var k in users) {
+            if (!users[k]) {
+                filterout.push(k);
+            }
+        }
+        drawDashboard();
+        $('#ignore').hide();
+        document.cookie = "filter="+JSON.stringify(filterout);
 
     }).on('click', 'button[rel=scrape]', function (event) {
         event.preventDefault();

@@ -92,7 +92,7 @@ func ReadInformation(d db.DB) (Health, error) {
 			Org:  org,
 			Name: name,
 		}
-		issues, err := d.Query(`SELECT id, title, assignees, created_at, updated_at FROM issues WHERE repo_id = ?`, id)
+		issues, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM issues WHERE repo_id = ?`, id)
 		if err != nil {
 			return nil, err
 		}
@@ -102,10 +102,10 @@ func ReadInformation(d db.DB) (Health, error) {
 		for issues.Next() {
 			var (
 				number           int
-				title, assignees string
+				title, reporter, assignees string
 				created, updated int
 			)
-			err = issues.Scan(&number, &title, &assignees, &created, &updated)
+			err = issues.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
 				return nil, err
 			}
@@ -117,11 +117,12 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
+				Reporter: reporter,
 				Assignees: split(assignees),
 			})
 		}
 
-		pulls, err := d.Query(`SELECT id, title, assignees, created_at, updated_at FROM pulls WHERE repo_id = ?`, id)
+		pulls, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM pulls WHERE repo_id = ?`, id)
 		if err != nil {
 			return nil, err
 		}
@@ -131,10 +132,10 @@ func ReadInformation(d db.DB) (Health, error) {
 		for pulls.Next() {
 			var (
 				number           int
-				title, assignees string
+				title, reporter, assignees string
 				created, updated int
 			)
-			err = pulls.Scan(&number, &title, &assignees, &created, &updated)
+			err = pulls.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
 				return nil, err
 			}
@@ -146,6 +147,7 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
+				Reporter: reporter,
 				Assignees: split(assignees),
 			})
 		}

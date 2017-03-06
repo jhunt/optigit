@@ -3,6 +3,7 @@
 
 <head>
 <title>optigit</title>
+<meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Alfa+Slab+One">
 <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Mako">
 <link rel="stylesheet" type="text/css" href="/css/reset.css">
@@ -15,10 +16,25 @@
   <header class="grid_16">
     <nav>
       <li><a href="#config">configure</a></li>
+      <li><a href="#ignore">users</a></li>
       <li><a href="#home">home</a></li>
       <li><a href="#refresh">refresh</a></li>
     </nav>
   </header>
+
+  <div id="ignore">
+    <div class="grid_16">
+        <h3>Only show Issues and Pull Requests submitted by:</h3>
+    </div>
+    <div class="grid_4"><ul></ul></div>
+    <div class="grid_4"><ul></ul></div>
+    <div class="grid_4"><ul></ul></div>
+    <div class="grid_4"><ul></ul></div>
+
+    <div class="grid_16">
+      <button rel="ignore">Update</button>
+    </div>
+  </div>
 
   <div id="dashboard">
   <div class="grid_8 panel" id="pulls">

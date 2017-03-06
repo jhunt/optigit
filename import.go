@@ -69,9 +69,14 @@ func importIssue(d db.DB, org, repo string, issue *github.Issue) error {
 		ppl[i] = *who.Login
 	}
 
+	user := ""
+	if issue.User != nil {
+		user = *issue.User.Login
+	}
+
 	fmt.Printf("import :: importing issue '#%d - %s' for %s/%s into database\n", *issue.Number, *issue.Title, org, repo)
-	return d.Exec(`INSERT INTO issues (id, repo_id, created_at, updated_at, assignees, title) VALUES (?, ?, ?, ?, ?, ?)`,
-		*issue.Number, id, created, updated, strings.Join(ppl, ","), *issue.Title)
+	return d.Exec(`INSERT INTO issues (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		*issue.Number, id, created, updated, user, strings.Join(ppl, ","), *issue.Title)
 }
 
 func clearPulls(d db.DB, org, repo string) error {
@@ -105,7 +110,12 @@ func importPull(d db.DB, org, repo string, pull *github.PullRequest) error {
 		ppl[i] = *who.Login
 	}
 
+	user := "EMPTY"
+	if pull.User != nil {
+		user = *pull.User.Login
+	}
+
 	fmt.Printf("import :: importing pull request '#%d - %s' for %s/%s into database\n", *pull.Number, *pull.Title, org, repo)
-	return d.Exec(`INSERT INTO pulls (id, repo_id, created_at, updated_at, assignees, title) VALUES (?, ?, ?, ?, ?, ?)`,
-		*pull.Number, id, created, updated, strings.Join(ppl, ","), *pull.Title)
+	return d.Exec(`INSERT INTO pulls (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		*pull.Number, id, created, updated, user, strings.Join(ppl, ","), *pull.Title)
 }

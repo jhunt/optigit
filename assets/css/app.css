@@ -10,6 +10,10 @@ h2 {
  font: 500 4.5em/80% 'Alfa Slab One', serif;
  color: #333;
 }
+h3 {
+ font: 500 1.5em/80% 'Alfa Slab One', serif;
+ color: #333;
+}
 
 .heading {
   height: 110px;
@@ -64,6 +68,9 @@ header a {
 	height: 24px;
 	width: 16px;
 	margin: 3px;
+}
+header a[href="#ignore"] {
+	background: transparent url(../images/users.png) 50% 50% no-repeat scroll;
 }
 header a[href="#config"] {
 	background: transparent url(../images/gear.png) 50% 50% no-repeat scroll;
@@ -138,4 +145,36 @@ button[rel=scrape]:active {
   transform: translateY(5px);
 }
 
-#dashboard, #configure { display: none; }
+#ignore, #dashboard, #configure { display: none; }
+
+#ignore label {
+ cursor: pointer;
+}
+#ignore .grid_16 {
+  margin-bottom: 2em;
+}
+#ignore button {
+  float: right;
+  font: 300 14px/20px 'Mako', sans-serif;
+
+  display: inline-block;
+  margin: 1em 0 0 0;
+  padding: 5px 15px;
+  line-height: 1.8;
+  appearance: none;
+  box-shadow: none;
+  border-radius: 0;
+
+  color: #fff;
+  background-color: #6496c8;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px #27496d;
+}
+
+#ignore button:hover { background-color: #417cb8 }
+#ignore button:active {
+  background-color: #417cb8;
+  box-shadow: 0 5px #27496d;
+  transform: translateY(5px);
+}
