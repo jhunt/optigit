@@ -29,6 +29,7 @@ func RunAPI(bind string) {
 		orgs := strings.Split(os.Getenv("ORGS"), " ")
 		err = Scrape(os.Getenv("GITHUB_TOKEN"), d, orgs...)
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "scrape failed: %s\n", err)
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "failed: %s\n", err)
 			return
