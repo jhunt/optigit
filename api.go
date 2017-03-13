@@ -24,6 +24,7 @@ func RunAPI(bind string) {
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+			return
 		}
 
 		orgs := strings.Split(os.Getenv("ORGS"), " ")
@@ -49,6 +50,7 @@ func RunAPI(bind string) {
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
+			return
 		}
 
 		health, err := ReadInformation(d)

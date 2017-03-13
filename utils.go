@@ -73,17 +73,12 @@ func database() (db.DB, error) {
 
 	err = d.Connect()
 	if err != nil {
-		//return d, err
 		return d, fmt.Errorf("could not connect: '%v'", err)
 	}
 	if !d.Connected() {
 		return d, fmt.Errorf("not connected")
 	}
-	err = Setup(d)
-	if err != nil {
-		//return d, err
-		return d, fmt.Errorf("could not setup: '%v'", err)
-	}
+	Setup(d)
 	return d, nil
 }
 
