@@ -281,7 +281,7 @@ $(function () {
     };
 
 
-
+    var timer;
     $(document.body).on('click', 'a[href="#ignore"]', function (event) {
         event.preventDefault();
         showIgnore();
@@ -306,15 +306,17 @@ $(function () {
         showDashboard();
 
     }).on('change', '#configure input[type=checkbox]', function (event) {
-        $.ajax({
-            type: 'POST',
-            url:  '/v1/repos',
-            processData: false,
-            data: JSON.stringify($('#configure').serializeArray()),
-            success: function () {
-                console.log('ok');
-            }
-        });
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+			$.ajax({
+              type: 'POST',
+              url:  '/v1/repos',
+              processData: false,
+              data: JSON.stringify($('#configure').serializeArray()),
+              success: function () {
+                  console.log('ok');
+              }
+            })},2000);
 
     }).on('click', 'button[rel=ignore]', function (event) {
         event.preventDefault();
