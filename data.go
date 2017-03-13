@@ -101,9 +101,9 @@ func ReadInformation(d db.DB) (Health, error) {
 		repo.Issues = make([]Issue, 0)
 		for issues.Next() {
 			var (
-				number           int
+				number                     int
 				title, reporter, assignees string
-				created, updated int
+				created, updated           int
 			)
 			err = issues.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
@@ -117,7 +117,7 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
-				Reporter: reporter,
+				Reporter:  reporter,
 				Assignees: split(assignees),
 			})
 		}
@@ -131,9 +131,9 @@ func ReadInformation(d db.DB) (Health, error) {
 		repo.PullRequests = make([]PullRequest, 0)
 		for pulls.Next() {
 			var (
-				number           int
+				number                     int
 				title, reporter, assignees string
-				created, updated int
+				created, updated           int
 			)
 			err = pulls.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
@@ -147,7 +147,7 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
-				Reporter: reporter,
+				Reporter:  reporter,
 				Assignees: split(assignees),
 			})
 		}

@@ -1,0 +1,13 @@
+---
+applications:
+  - name: optigit
+    buildpack: go_buildpack
+    instances: 1
+    services:
+      - githud-db
+    routes:
+      - route: githud.starkandwayne.com
+    env:
+      GOPACKAGENAME: optigit
+      GITHUB_TOKEN: #YOUR_TOKEN
+      ORGS: starkandwayne
