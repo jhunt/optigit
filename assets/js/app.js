@@ -284,6 +284,10 @@ $(function () {
     var timer;
     $(document.body).on('click', 'a[href="#ignore"]', function (event) {
         event.preventDefault();
+		if ($('#ignore').is(':visible')) {
+			$('#ignore').hide();
+			return;
+		}
         showIgnore();
 
     }).on('click', 'a[href="#config"]', function (event) {
@@ -320,6 +324,7 @@ $(function () {
 
     }).on('click', 'button[rel=ignore]', function (event) {
         event.preventDefault();
+
         for (k in users) {
             users[k] = 0;
         }
