@@ -9,7 +9,7 @@ import (
 )
 
 func findRepo(d db.DB, org, repo string) (int, error) {
-	r, err := d.Query(`SELECT id FROM repos WHERE org = ? AND name = ?`, org, repo)
+	r, err := d.Query(`SELECT id FROM repos WHERE org = $1 AND name = $2`, org, repo)
 	if err != nil {
 		return 0, err
 	}
@@ -30,7 +30,7 @@ func importRepo(d db.DB, org, repo string) error {
 	}
 
 	fmt.Printf("import :: importing repo %s/%s into database\n", org, repo)
-	err = d.Exec(`INSERT INTO repos (org, name, included) VALUES (?, ?, 1)`, org, repo)
+	err = d.Exec(`INSERT INTO repos (org, name, included) VALUES ($1, $2, 1)`, org, repo)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func clearIssues(d db.DB, org, repo string) error {
 	}
 
 	fmt.Printf("import :: deleting all cached issues for %s/%s from database\n", org, repo)
-	return d.Exec(`DELETE FROM issues WHERE repo_id = ?`, id)
+	return d.Exec(`DELETE FROM issues WHERE repo_id = $1`, id)
 }
 
 func importIssue(d db.DB, org, repo string, issue *github.Issue) error {
@@ -75,7 +75,7 @@ func importIssue(d db.DB, org, repo string, issue *github.Issue) error {
 	}
 
 	fmt.Printf("import :: importing issue '#%d - %s' for %s/%s into database\n", *issue.Number, *issue.Title, org, repo)
-	return d.Exec(`INSERT INTO issues (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+	return d.Exec(`INSERT INTO issues (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		*issue.Number, id, created, updated, user, strings.Join(ppl, ","), *issue.Title)
 }
 
@@ -86,7 +86,7 @@ func clearPulls(d db.DB, org, repo string) error {
 	}
 
 	fmt.Printf("import :: deleting all cached pull requests for %s/%s from database\n", org, repo)
-	return d.Exec(`DELETE FROM pulls WHERE repo_id = ?`, id)
+	return d.Exec(`DELETE FROM pulls WHERE repo_id = $1`, id)
 }
 
 func importPull(d db.DB, org, repo string, pull *github.PullRequest) error {
@@ -116,6 +116,6 @@ func importPull(d db.DB, org, repo string, pull *github.PullRequest) error {
 	}
 
 	fmt.Printf("import :: importing pull request '#%d - %s' for %s/%s into database\n", *pull.Number, *pull.Title, org, repo)
-	return d.Exec(`INSERT INTO pulls (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+	return d.Exec(`INSERT INTO pulls (id, repo_id, created_at, updated_at, reporter, assignees, title) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		*pull.Number, id, created, updated, user, strings.Join(ppl, ","), *pull.Title)
 }

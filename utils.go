@@ -19,7 +19,7 @@ func split(s string) []string {
 	return strings.Split(s, ",")
 }
 
-func vcapdb(vcapenv string) ([]string, error) {
+func vcapdb(vcapenv string) (string, string, error) {
 	var vcap map[string][]struct {
 		Credentials    map[string]interface{} `json:"credentials"`
 		Label          string                 `json:"label"`
@@ -32,7 +32,7 @@ func vcapdb(vcapenv string) ([]string, error) {
 	var dsn, driver string
 	err := json.Unmarshal([]byte(vcapenv), &vcap)
 	if err != nil {
-		return nil, fmt.Errorf("error: '%s'\n", err)
+		return "", "", fmt.Errorf("error: '%s'\n", err)
 	}
 	for _, t := range vcap {
 		for _, st := range t {
@@ -41,12 +41,12 @@ func vcapdb(vcapenv string) ([]string, error) {
 			driver = fmt.Sprintf("%s", dsnsplit[0])
 		}
 	}
-	return []string{driver, dsn}, nil
+	return driver, dsn, nil
 }
 
 func database() (db.DB, error) {
 	env := os.Getenv("VCAP_SERVICES")
-	var dsn []string
+	var driver, dsn string
 	var err error
 
 	if env == "" {
@@ -55,20 +55,22 @@ func database() (db.DB, error) {
 			return db.DB{}, fmt.Errorf("no DATABASE or VCAP_SERVICES env var set; which database do you want to use?")
 		}
 
-		dsn = strings.Split(env, ":")
-		if len(dsn) != 2 {
+		dlist := strings.SplitN(env, ":", 2)
+		if len(dlist) != 2 {
 			return db.DB{}, fmt.Errorf("failed to determine database from DATABASE '%s' env var", os.Getenv("DATABASE"))
 		}
+		driver = dlist[0]
+		dsn = env
 	} else {
-		dsn, err = vcapdb(env)
+		driver, dsn, err = vcapdb(env)
 		if err != nil {
 			return db.DB{}, fmt.Errorf("could not parse VCAP_SERVICES: '%v'", err)
 		}
 	}
 
 	d := db.DB{
-		Driver: dsn[0],
-		DSN:    dsn[1],
+		Driver: driver,
+		DSN:    dsn,
 	}
 
 	err = d.Connect()
@@ -78,7 +80,10 @@ func database() (db.DB, error) {
 	if !d.Connected() {
 		return d, fmt.Errorf("not connected")
 	}
-	Setup(d)
+	err = SetupSchema(d)
+	if err != nil {
+		return d, fmt.Errorf("could not setup schema: '%v'", err)
+	}
 	return d, nil
 }
 

@@ -72,7 +72,10 @@ func (g *Github) ScrapeRepos(d db.DB, org string) error {
 		return err
 	}
 	for _, repo := range repos {
-		importRepo(d, org, repo)
+		err = importRepo(d, org, repo)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

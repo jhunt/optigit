@@ -3,6 +3,8 @@ applications:
   - name: optigit
     buildpack: go_buildpack
     instances: 1
+    disk_quota: 128M
+    memory: 64M
     services:
       - githud-db
     routes:
@@ -10,4 +12,4 @@ applications:
     env:
       GOPACKAGENAME: optigit
       GITHUB_TOKEN: #YOUR_TOKEN
-      ORGS: starkandwayne
+      ORGS: starkandwayne cloudfoundry-community genesis-community blacksmith-community

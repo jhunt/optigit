@@ -1,5 +1,6 @@
 all: optigit
 optigit:
+	go fmt ./...
 	go build -o optigit .
 
 assets:

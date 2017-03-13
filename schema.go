@@ -6,14 +6,21 @@ import (
 	"github.com/jhunt/go-db"
 )
 
-func Setup(d db.DB) {
+func SetupSchema(d db.DB) error {
 	s := db.NewSchema()
 	s.Version(1, func(d *db.DB) error {
 		var err error
 		switch d.Driver {
-		case "postgres", "mysql", "sqlite3":
+		case "mysql", "sqlite3":
 			err = d.Exec(`CREATE TABLE repos (
 			   id       integer      not null primary key,
+			   org      varchar(100) not null,
+			   name     varchar(200) not null,
+			   included smallint     not null
+			)`)
+		case "postgres":
+			err = d.Exec(`CREATE TABLE repos (
+			   id       serial       not null primary key,
 			   org      varchar(100) not null,
 			   name     varchar(200) not null,
 			   included smallint     not null
@@ -47,8 +54,8 @@ func Setup(d db.DB) {
 		switch d.Driver {
 		case "postgres", "mysql", "sqlite3":
 			err = d.Exec(`CREATE TABLE issues (
-			  id      integer not null,
-			  repo_id integer not null,
+			  id          integer not null,
+			  repo_id     integer not null,
 			  created_at  integer NOT NULL,
 			  updated_at  integer NOT NULL,
 			  reporter    text NOT NULL,
@@ -65,5 +72,6 @@ func Setup(d db.DB) {
 
 		return nil
 	})
-
+	err := s.Migrate(&d, db.Latest)
+	return err
 }
