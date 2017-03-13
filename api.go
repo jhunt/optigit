@@ -8,10 +8,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jhunt/go-db"
 	"github.com/jhunt/optigit/static"
 )
 
-func RunAPI(bind string) {
+func RunAPI(bind string, d db.DB) {
+	var err error
 	http.HandleFunc("/v1/scrape", func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
 			w.WriteHeader(404)
@@ -19,12 +21,6 @@ func RunAPI(bind string) {
 			return
 		}
 		fmt.Printf("Starting scrape...\n")
-
-		d, err := database()
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
-		}
 
 		orgs := strings.Split(os.Getenv("ORGS"), " ")
 		err = Scrape(os.Getenv("GITHUB_TOKEN"), d, orgs...)
@@ -43,12 +39,6 @@ func RunAPI(bind string) {
 			w.WriteHeader(404)
 			fmt.Fprintf(w, "404 not found\n")
 			return
-		}
-
-		d, err := database()
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
 		}
 
 		health, err := ReadInformation(d)
@@ -73,13 +63,6 @@ func RunAPI(bind string) {
 		if req.Method != "GET" && req.Method != "POST" {
 			w.WriteHeader(404)
 			fmt.Fprintf(w, "404 not found\n")
-			return
-		}
-
-		d, err := database()
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "failed connecting to backend database: %s\n", err)
 			return
 		}
 
@@ -135,7 +118,7 @@ func RunAPI(bind string) {
 
 	http.Handle("/", static.Handler{})
 
-	err := http.ListenAndServe(bind, nil)
+	err = http.ListenAndServe(bind, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "http server exited: %s\n", err)
 	}

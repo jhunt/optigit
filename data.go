@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/jhunt/go-db"
 )
@@ -14,8 +13,13 @@ type RepoWatch struct {
 }
 
 func UpdateRepos(d db.DB, lst []RepoWatch) error {
+	var err error
 	include := make([]interface{}, 0)
 
+	err = d.Exec(`UPDATE repos SET included = 0`)
+	if err != nil {
+		return err
+	}
 	for _, watch := range lst {
 		id, err := strconv.ParseInt(watch.Name, 10, 0)
 		if err != nil {
@@ -23,17 +27,10 @@ func UpdateRepos(d db.DB, lst []RepoWatch) error {
 		}
 		if watch.Value == "on" {
 			include = append(include, int(id))
-		}
-	}
-
-	if len(include) > 0 {
-		err := d.Exec(`UPDATE repos SET included = 1 WHERE id IN (?`+strings.Repeat(`,?`, len(include)-1)+`)`, include...)
-		if err != nil {
-			return err
-		}
-		err = d.Exec(`UPDATE repos SET included = 0 WHERE id NOT IN (?`+strings.Repeat(`,?`, len(include)-1)+`)`, include...)
-		if err != nil {
-			return err
+			err = d.Exec(`UPDATE repos SET included = 1 WHERE id = $1`, int(id))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -92,7 +89,7 @@ func ReadInformation(d db.DB) (Health, error) {
 			Org:  org,
 			Name: name,
 		}
-		issues, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM issues WHERE repo_id = ?`, id)
+		issues, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM issues WHERE repo_id = $1`, id)
 		if err != nil {
 			return nil, err
 		}
@@ -101,9 +98,9 @@ func ReadInformation(d db.DB) (Health, error) {
 		repo.Issues = make([]Issue, 0)
 		for issues.Next() {
 			var (
-				number           int
+				number                     int
 				title, reporter, assignees string
-				created, updated int
+				created, updated           int
 			)
 			err = issues.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
@@ -117,12 +114,12 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
-				Reporter: reporter,
+				Reporter:  reporter,
 				Assignees: split(assignees),
 			})
 		}
 
-		pulls, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM pulls WHERE repo_id = ?`, id)
+		pulls, err := d.Query(`SELECT id, title, reporter, assignees, created_at, updated_at FROM pulls WHERE repo_id = $1`, id)
 		if err != nil {
 			return nil, err
 		}
@@ -131,9 +128,9 @@ func ReadInformation(d db.DB) (Health, error) {
 		repo.PullRequests = make([]PullRequest, 0)
 		for pulls.Next() {
 			var (
-				number           int
+				number                     int
 				title, reporter, assignees string
-				created, updated int
+				created, updated           int
 			)
 			err = pulls.Scan(&number, &title, &reporter, &assignees, &created, &updated)
 			if err != nil {
@@ -147,7 +144,7 @@ func ReadInformation(d db.DB) (Health, error) {
 				Created: created,
 				Updated: updated,
 
-				Reporter: reporter,
+				Reporter:  reporter,
 				Assignees: split(assignees),
 			})
 		}

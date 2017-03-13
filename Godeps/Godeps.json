@@ -4,6 +4,11 @@
 	"GodepVersion": "v79",
 	"Deps": [
 		{
+			"ImportPath": "github.com/go-sql-driver/mysql",
+			"Comment": "v1.3-2-g2e00b5c",
+			"Rev": "2e00b5cd70399450106cec6431c2e2ce3cae5034"
+		},
+		{
 			"ImportPath": "github.com/google/go-github/github",
 			"Rev": "b59d3a6479bd00374a1523ad032da4621d9dd84a"
 		},
@@ -14,6 +19,16 @@
 		{
 			"ImportPath": "github.com/jhunt/go-db",
 			"Rev": "2031f1e86b216e25b9eec481d16885d3012c205a"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-162-ge4af84a",
+			"Rev": "e4af84aab01e159ca479940dbde304519e8e8811"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-162-ge4af84a",
+			"Rev": "e4af84aab01e159ca479940dbde304519e8e8811"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
