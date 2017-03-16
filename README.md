@@ -3,6 +3,8 @@
 A dashboard that allows you to track the outstanding pull requests
 and issues on orgs/repositories of your choosing.
 
+![Screenshot](screenshot.png)
+
 ## Testing
 
 Load test data into a SQLite database:
