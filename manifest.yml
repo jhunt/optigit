@@ -13,4 +13,5 @@ applications:
     env:
       GOPACKAGENAME: optigit
       GITHUB_TOKEN: #YOUR_TOKEN
+      REFRESH_INTERVAL: 1h
       ORGS: starkandwayne cloudfoundry-community genesis-community blacksmith-community
