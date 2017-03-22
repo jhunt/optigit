@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"github.com/jhunt/go-db"
@@ -26,6 +27,10 @@ func NewGithub(token string) *Github {
 	}
 }
 
+func is404(err error) bool {
+	return strings.Contains(err.Error(), "404 ")
+}
+
 func (g *Github) IssuesFor(who, repo string) ([]*github.Issue, error) {
 	opt := &github.IssueListByRepoOptions{
 		ListOptions: github.ListOptions{PerPage: 10},
@@ -35,6 +40,9 @@ func (g *Github) IssuesFor(who, repo string) ([]*github.Issue, error) {
 	for {
 		page, resp, err := g.Client.Issues.ListByRepo(g.Context, who, repo, opt)
 		if err != nil {
+			if is404(err) {
+				return nil, nil
+			}
 			return nil, err
 		}
 		l = append(l, page...)
@@ -55,6 +63,9 @@ func (g *Github) PullsFor(who, repo string) ([]*github.PullRequest, error) {
 	for {
 		page, resp, err := g.Client.PullRequests.List(g.Context, who, repo, opt)
 		if err != nil {
+			if is404(err) {
+				return nil, nil
+			}
 			return nil, err
 		}
 		l = append(l, page...)
