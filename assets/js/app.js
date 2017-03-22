@@ -218,7 +218,7 @@ $(function () {
                 list += '<li><a href="'+pull.url+'" target="_blank">'+
                                '#'+pull.number+' '+pull.title+'</a>'+
                             '<span class="'+css(pull.updated)+'">'+age(pull.updated)+'</span>'+
-                            '<p>'+reportedby(pull)+' / '+assignedto(issue)+'</p></li>';
+                            '<p>'+reportedby(pull)+' / '+assignedto(pull)+'</p></li>';
             }
             $l.append($('<h3>'+repo.org+' / '+repo.name+'</h3>'+
                         '<ul>'+list+'</ul>'));
