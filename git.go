@@ -26,14 +26,14 @@ func NewGithub(token string) *Github {
 	}
 }
 
-func (g *Github) IssuesFor(org, repo string) ([]*github.Issue, error) {
+func (g *Github) IssuesFor(who, repo string) ([]*github.Issue, error) {
 	opt := &github.IssueListByRepoOptions{
 		ListOptions: github.ListOptions{PerPage: 10},
 	}
 
 	var l []*github.Issue
 	for {
-		page, resp, err := g.Client.Issues.ListByRepo(g.Context, org, repo, opt)
+		page, resp, err := g.Client.Issues.ListByRepo(g.Context, who, repo, opt)
 		if err != nil {
 			return nil, err
 		}
@@ -46,14 +46,14 @@ func (g *Github) IssuesFor(org, repo string) ([]*github.Issue, error) {
 	return l, nil
 }
 
-func (g *Github) PullsFor(org, repo string) ([]*github.PullRequest, error) {
+func (g *Github) PullsFor(who, repo string) ([]*github.PullRequest, error) {
 	opt := &github.PullRequestListOptions{
 		ListOptions: github.ListOptions{PerPage: 10},
 	}
 
 	var l []*github.PullRequest
 	for {
-		page, resp, err := g.Client.PullRequests.List(g.Context, org, repo, opt)
+		page, resp, err := g.Client.PullRequests.List(g.Context, who, repo, opt)
 		if err != nil {
 			return nil, err
 		}
@@ -66,13 +66,13 @@ func (g *Github) PullsFor(org, repo string) ([]*github.PullRequest, error) {
 	return l, nil
 }
 
-func (g *Github) ScrapeRepos(d db.DB, org string) error {
-	repos, err := g.ReposFor(org)
+func (g *Github) ScrapeRepos(d db.DB, who string) error {
+	repos, err := g.ReposFor(who)
 	if err != nil {
 		return err
 	}
 	for _, repo := range repos {
-		err = importRepo(d, org, repo)
+		err = importRepo(d, who, repo)
 		if err != nil {
 			return err
 		}
@@ -80,18 +80,18 @@ func (g *Github) ScrapeRepos(d db.DB, org string) error {
 	return nil
 }
 
-func (g *Github) ScrapeIssues(d db.DB, org, repo string) error {
-	issues, err := g.IssuesFor(org, repo)
+func (g *Github) ScrapeIssues(d db.DB, who, repo string) error {
+	issues, err := g.IssuesFor(who, repo)
 	if err != nil {
 		return err
 	}
 
-	err = clearIssues(d, org, repo)
+	err = clearIssues(d, who, repo)
 	if err != nil {
 		return err
 	}
 	for _, issue := range issues {
-		err = importIssue(d, org, repo, issue)
+		err = importIssue(d, who, repo, issue)
 		if err != nil {
 			return err
 		}
@@ -99,18 +99,18 @@ func (g *Github) ScrapeIssues(d db.DB, org, repo string) error {
 	return nil
 }
 
-func (g *Github) ScrapePulls(d db.DB, org, repo string) error {
-	pulls, err := g.PullsFor(org, repo)
+func (g *Github) ScrapePulls(d db.DB, who, repo string) error {
+	pulls, err := g.PullsFor(who, repo)
 	if err != nil {
 		return err
 	}
 
-	err = clearPulls(d, org, repo)
+	err = clearPulls(d, who, repo)
 	if err != nil {
 		return err
 	}
 	for _, pull := range pulls {
-		err = importPull(d, org, repo, pull)
+		err = importPull(d, who, repo, pull)
 		if err != nil {
 			return err
 		}
@@ -118,22 +118,29 @@ func (g *Github) ScrapePulls(d db.DB, org, repo string) error {
 	return nil
 }
 
-func (g *Github) ReposFor(org string) ([]string, error) {
-	opt := &github.RepositoryListByOrgOptions{
+func (g *Github) ReposFor(who string) ([]string, error) {
+	oopt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+	}
+	uopt := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{PerPage: 10},
 	}
 
 	var l []*github.Repository
 	for {
-		page, resp, err := g.Client.Repositories.ListByOrg(g.Context, org, opt)
+		page, resp, err := g.Client.Repositories.ListByOrg(g.Context, who, oopt)
 		if err != nil {
-			return nil, err
+			page, resp, err = g.Client.Repositories.List(g.Context, who, uopt)
+			if err != nil {
+				return nil, err
+			}
 		}
 		l = append(l, page...)
 		if resp.NextPage == 0 {
 			break
 		}
-		opt.ListOptions.Page = resp.NextPage
+		oopt.ListOptions.Page = resp.NextPage
+		uopt.ListOptions.Page = resp.NextPage
 	}
 
 	names := make([]string, len(l))
@@ -143,10 +150,10 @@ func (g *Github) ReposFor(org string) ([]string, error) {
 	return names, nil
 }
 
-func Scrape(token string, d db.DB, orgs ...string) error {
+func Scrape(token string, d db.DB, users_or_orgs ...string) error {
 	g := NewGithub(token)
-	for _, org := range orgs {
-		err := g.ScrapeRepos(d, org)
+	for _, who := range users_or_orgs {
+		err := g.ScrapeRepos(d, who)
 		if err != nil {
 			return err
 		}
@@ -161,26 +168,26 @@ func Scrape(token string, d db.DB, orgs ...string) error {
 
 	for r.Next() {
 		var (
-			org, repo string
+			who, repo string
 		)
-		err = r.Scan(&org, &repo)
+		err = r.Scan(&who, &repo)
 		if err != nil {
 			return err
 		}
-		repos = append(repos, [2]string{org, repo})
+		repos = append(repos, [2]string{who, repo})
 	}
 	r.Close()
 
 	for _, s := range repos {
-		org := s[0]
+		who := s[0]
 		repo := s[1]
 
-		err = g.ScrapeIssues(d, org, repo)
+		err = g.ScrapeIssues(d, who, repo)
 		if err != nil {
 			return err
 		}
 
-		err = g.ScrapePulls(d, org, repo)
+		err = g.ScrapePulls(d, who, repo)
 		if err != nil {
 			return err
 		}
