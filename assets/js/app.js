@@ -288,10 +288,10 @@ $(function () {
     var timer;
     $(document.body).on('click', 'a[href="#ignore"]', function (event) {
         event.preventDefault();
-		if ($('#ignore').is(':visible')) {
-			$('#ignore').hide();
-			return;
-		}
+        if ($('#ignore').is(':visible')) {
+            $('#ignore').hide();
+            return;
+        }
         showIgnore();
 
     }).on('click', 'a[href="#config"]', function (event) {
@@ -316,14 +316,14 @@ $(function () {
     }).on('change', '#configure input[type=checkbox]', function (event) {
         clearTimeout(timer);
         timer = setTimeout(function () {
-			$.ajax({
-              type: 'POST',
-              url:  '/v1/repos',
-              processData: false,
-              data: JSON.stringify($('#configure').serializeArray()),
-              success: function () {
-                  console.log('ok');
-              }
+            $.ajax({
+                type: 'POST',
+                url:  '/v1/repos',
+                processData: false,
+                data: JSON.stringify($('#configure').serializeArray()),
+                success: function () {
+                    console.log('ok');
+                }
             })},2000);
 
     }).on('click', 'button[rel=ignore]', function (event) {
