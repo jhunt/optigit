@@ -157,12 +157,16 @@ $(function () {
         var $l;
 
         for (var k in data) {
-            for (var type in ['pulls', 'issues']) {
-                for (var i = 0; i < data[k].pulls.length; i++) {
-                    var u = data[k].pulls[i].reporter;
-                    if (u != "" && !(u in users)) {
-                        users[u] = 1; /* default on for newly seen users */
-                    }
+            for (var i = 0; i < data[k].issues.length; i++) {
+                var u = data[k].issues[i].reporter;
+                if (u != "" && !(u in users)) {
+                    users[u] = 1; /* default on for newly seen users */
+                }
+            }
+            for (var i = 0; i < data[k].pulls.length; i++) {
+                var u = data[k].pulls[i].reporter;
+                if (u != "" && !(u in users)) {
+                    users[u] = 1; /* default on for newly seen users */
                 }
             }
         }
