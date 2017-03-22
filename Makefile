@@ -11,4 +11,8 @@ clean:
 	rm -f embed optigit
 	rm -f static/assets.go
 
+deploy:
+	@make assets optigit
+	cf push
+
 .PHONY: all optigit assets clean
