@@ -109,7 +109,7 @@ function get_cookie(name, deflt) {
     var cookies = document.cookie.split(/ *; */);
     for (var i = 0; i < cookies.length; i++) {
         var p = cookies[i].split(/=/);
-        if (p.length > 1) {
+        if (p.length > 1 && p[0] == name) {
             p.shift();
             return p.join('=');
         }
