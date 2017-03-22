@@ -204,5 +204,6 @@ func Scrape(token string, d db.DB, users_or_orgs ...string) error {
 		}
 	}
 
+	DedupePullRequests(d)
 	return nil
 }

@@ -154,3 +154,20 @@ func ReadInformation(d db.DB) (Health, error) {
 
 	return health, nil
 }
+
+func DedupePullRequests(d db.DB) {
+	switch d.Driver {
+	case "postgres":
+		d.Exec(`DELETE FROM issues
+		        USING pulls
+		        WHERE issues.repo_id = pulls.repo_id
+		          AND issues.id      = pulls.id`)
+
+	case "sqlite3":
+		d.Exec(`DELETE FROM issues
+		        WHERE EXISTS (
+		          SELECT * FROM pulls
+		           WHERE pulls.id = issues.id
+		        )`)
+	}
+}
