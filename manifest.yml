@@ -9,6 +9,7 @@ applications:
       - githud-db
     routes:
       - route: githud.starkandwayne.com
+      - route: optigit.starkandwayne.com
     env:
       GOPACKAGENAME: optigit
       GITHUB_TOKEN: #YOUR_TOKEN
