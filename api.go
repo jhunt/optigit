@@ -13,6 +13,8 @@ import (
 )
 
 func RunAPI(bind string, d db.DB) {
+	go Cron(os.Getenv("REFRESH_INTERVAL"), d)
+
 	var err error
 	http.HandleFunc("/v1/scrape", func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
