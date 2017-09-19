@@ -117,16 +117,30 @@ function get_cookie(name, deflt) {
     return deflt;
 }
 
+function empty(map) {
+    var n = 0;
+    for (var k in map) { n++; }
+    return n == 0;
+}
+
+function mapify(lst, v, m) {
+    if (typeof(m) == "undefined") { m = {}; }
+    if (typeof(lst) == "string") {
+        lst = lst.split(/ /);
+    }
+    for (var i = 0; i < lst.length; i++) {
+      m[lst[i]] = v;
+    }
+    return m;
+}
+
 $(function () {
     $('#dashboard, #ignore, #configure').hide();
 
     var data = {};
     var users = {}; /* set to 1 if the user should be visible; */
     try {
-        var usernames = JSON.parse(get_cookie('filter', '[]'));
-        for (var i = 0; i < usernames.length; i++) {
-            users[usernames[i]] = 0;
-        }
+        users = mapify(JSON.parse(get_cookie('filter', '[]')), 0, users);
     } catch (e) {
         console.log("Failed to parse usernames from cookie '%s': %s", document.cookie, e);
     }
@@ -234,7 +248,10 @@ $(function () {
             type: 'GET',
             url:  '/v1/health',
             success: function (rdata) {
-                data = rdata;
+                if (empty(users)) {
+                  users = mapify(rdata.ignore, 0);
+                }
+                data = rdata.repos;
                 drawDashboard();
             },
         });

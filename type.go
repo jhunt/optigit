@@ -29,4 +29,7 @@ type Repository struct {
 	Issues       []Issue       `json:"issues"`
 }
 
-type Health map[string]Repository
+type Health struct {
+	Repos  map[string]Repository `json:"repos"`
+	Ignore string                `json:"ignore"`
+}

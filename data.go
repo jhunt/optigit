@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/jhunt/go-db"
@@ -65,8 +66,11 @@ func ReadRepos(d db.DB) ([]Repository, error) {
 	return l, nil
 }
 
-func ReadInformation(d db.DB) (Health, error) {
-	health := make(map[string]Repository)
+func ReadInformation(d db.DB) (*Health, error) {
+	health := &Health{
+		Repos:  make(map[string]Repository),
+		Ignore: os.Getenv("IGNORE"),
+	}
 
 	repos, err := d.Query(`SELECT id, org, name FROM repos WHERE included = 1`)
 	if err != nil {
@@ -149,7 +153,7 @@ func ReadInformation(d db.DB) (Health, error) {
 			})
 		}
 
-		health[fmt.Sprintf("%s/%s", repo.Org, repo.Name)] = repo
+		health.Repos[fmt.Sprintf("%s/%s", repo.Org, repo.Name)] = repo
 	}
 
 	return health, nil
