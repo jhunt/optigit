@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/jhunt/optigit",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.10",
 	"GodepVersion": "v79",
 	"Deps": [
 		{
