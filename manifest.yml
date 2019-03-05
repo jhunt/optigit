@@ -8,7 +8,6 @@ applications:
     services:
       - githud-db
     routes:
-      - route: githud.starkandwayne.com
       - route: optigit.starkandwayne.com
     env:
       GOPACKAGENAME: optigit
