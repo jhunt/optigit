@@ -11,8 +11,9 @@ clean:
 	rm -f embed optigit
 	rm -f static/assets.go
 
-deploy:
-	@make assets optigit
-	cf push
+build:
+	docker build -t filefrog/optigit:latest .
+push: build
+	docker push filefrog/optigit:latest
 
-.PHONY: all optigit assets clean
+.PHONY: all optigit assets clean build push
