@@ -60,7 +60,7 @@ func database() (db.DB, error) {
 			return db.DB{}, fmt.Errorf("failed to determine database from DATABASE '%s' env var", os.Getenv("DATABASE"))
 		}
 		driver = dlist[0]
-		dsn = env
+		dsn = dlist[1]
 	} else {
 		driver, dsn, err = vcapdb(env)
 		if err != nil {
