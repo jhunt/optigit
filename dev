@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export DATABASE=sqlite3:db/sq.db
-export PORT=8081
-export ORGS=starkandwayne
-./optigit
+docker run --rm -d -p 8099:3000 \
+  -e DATABASE=sqlite3:/db.sqlite \
+  -e ORGS=starkandwayne \
+  -e GITHUB_TOKEN \
+  filefrog/optigit:latest
