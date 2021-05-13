@@ -51,7 +51,6 @@ func fspath(req string) string {
 func (h Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
 		path := fspath(req.URL.Path)
-		fmt.Printf("GET %s\n", path)
 
 		alt := os.Getenv("OPTIGIT_UI_ROOT")
 		if len(Assets) == 0 || alt != "" {
