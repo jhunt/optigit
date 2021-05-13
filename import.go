@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v35/github"
 	"github.com/jhunt/go-db"
 )
 

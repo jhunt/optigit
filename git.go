@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v35/github"
 	"github.com/jhunt/go-db"
 	"golang.org/x/oauth2"
 )
@@ -83,7 +83,7 @@ func (g *Github) ScrapeRepos(d db.DB, who string) error {
 		return err
 	}
 	for _, repo := range repos {
-		err = importRepo(d, who, repo)
+		err = importRepo(d, strings.Split(who, "/")[0], repo)
 		if err != nil {
 			return err
 		}
@@ -131,27 +131,41 @@ func (g *Github) ScrapePulls(d db.DB, who, repo string) error {
 
 func (g *Github) ReposFor(who string) ([]string, error) {
 	oopt := &github.RepositoryListByOrgOptions{
-		ListOptions: github.ListOptions{PerPage: 10},
+		ListOptions: github.ListOptions{PerPage: 100},
 	}
+	topt := &github.ListOptions{PerPage: 100}
 	uopt := &github.RepositoryListOptions{
-		ListOptions: github.ListOptions{PerPage: 10},
+		ListOptions: github.ListOptions{PerPage: 100},
 	}
 
 	var l []*github.Repository
 	for {
-		page, resp, err := g.Client.Repositories.ListByOrg(g.Context, who, oopt)
-		if err != nil {
-			page, resp, err = g.Client.Repositories.List(g.Context, who, uopt)
+		orgTeam := strings.Split(who, "/")
+		var page []*github.Repository
+		var resp *github.Response
+		var err error
+		if len(orgTeam) == 2 {
+			page, resp, err = g.Client.Teams.ListTeamReposBySlug(g.Context, orgTeam[0], orgTeam[1], topt)
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			page, resp, err = g.Client.Repositories.ListByOrg(g.Context, who, oopt)
+			if err != nil {
+				page, resp, err = g.Client.Repositories.List(g.Context, who, uopt)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
+
 		l = append(l, page...)
 		if resp.NextPage == 0 {
 			break
 		}
 		oopt.ListOptions.Page = resp.NextPage
 		uopt.ListOptions.Page = resp.NextPage
+		topt.Page = resp.NextPage
 	}
 
 	names := make([]string, len(l))
