@@ -45,16 +45,11 @@ func vcapdb(vcapenv string) (string, string, error) {
 }
 
 func database() (db.DB, error) {
-	env := os.Getenv("VCAP_SERVICES")
+	env := os.Getenv("DATABASE")
 	var driver, dsn string
 	var err error
 
-	if env == "" {
-		env = os.Getenv("DATABASE")
-		if env == "" {
-			return db.DB{}, fmt.Errorf("no DATABASE or VCAP_SERVICES env var set; which database do you want to use?")
-		}
-
+	if env != "" {
 		dlist := strings.SplitN(env, ":", 2)
 		if len(dlist) != 2 {
 			return db.DB{}, fmt.Errorf("failed to determine database from DATABASE '%s' env var", os.Getenv("DATABASE"))
@@ -62,6 +57,10 @@ func database() (db.DB, error) {
 		driver = dlist[0]
 		dsn = dlist[1]
 	} else {
+		env = os.Getenv("VCAP_SERVICES")
+		if env == "" {
+			return db.DB{}, fmt.Errorf("no DATABASE or VCAP_SERVICES env var set; which database do you want to use?")
+		}
 		driver, dsn, err = vcapdb(env)
 		if err != nil {
 			return db.DB{}, fmt.Errorf("could not parse VCAP_SERVICES: '%v'", err)

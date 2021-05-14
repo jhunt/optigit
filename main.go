@@ -21,11 +21,11 @@ func main() {
 
 	bind := bindto()
 	fmt.Printf("listening on %s\n", bind)
-	if os.Getenv("VCAP_SERVICES") != "" {
+	if os.Getenv("DATABASE") != "" {
+		fmt.Printf("using database %s\n", os.Getenv("DATABASE"))
+	} else {
 		_, dsn, _ := vcapdb(os.Getenv("VCAP_SERVICES"))
 		fmt.Printf("using vcap %s database\n", dsn)
-	} else {
-		fmt.Printf("using database %s\n", os.Getenv("DATABASE"))
 	}
 	d, err := database()
 	if err != nil {
