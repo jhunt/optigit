@@ -17,7 +17,7 @@ $ GITHUB_TOKEN=1234 DATABASE=sqlite3:test.db ORGS=test ./optigit
 Optigit is configured entirely via environment variables.
 
 - **ORGS** (required) A space-separated list of Github org names
-  to watch.
+  to watch. Can also filter by team using `<org>/<team>` format.
 
 - **DATABASE** (required) The full DSN of the database to use for
   storing state.  If this is not set, the `$VCAP_SERVICES`
